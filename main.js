@@ -1,36 +1,50 @@
-
-//selector variable
-var inputval = document.querySelector('#cityinput')
-var btn = document.querySelector('#add');
-var city = document.querySelector('#cityoutput')
-var descrip = document.querySelector('#description')
-var temp = document.querySelector('#temp')
-var wind = document.querySelector('#wind')
-
-
-// Get your own free OWM API key at https://www.openweathermap.org/appid - please do not re-use mine!
-// You don't need an API key for this to work at the moment, but this will change eventually.
-apik = "3045dd712ffe6e702e3245525ac7fa38"
-//kelvin to celcious
-function convertion(val){
-    return (val - 273).toFixed(2)
-}
-//fetch
-    btn.addEventListener('click', function(){
-        fetch('https://api.openweathermap.org/data/2.5/weather?q='+inputval.value+'&appid='+apik)
-        .then(res => res.json())
-         //.then(data => console.log(data))
-        .then(data => {
-            var nameval = data['name']
-            var descrip = data['weather']['0']['description']
-            var tempature = data['main']['temp']
-            var wndspd = data['wind']['speed']
-
-            city.innerHTML=`City: ${nameval}`
-            temp.innerHTML = `Temperature: ${ convertion(tempature)} C`
-            description.innerHTML = `Conditions: ${descrip}`
-            wind.innerHTML = `Wind Speed: ${wndspd} km/h`
-
-        })
-        .catch(err => alert('You entered Wrong city name'))
-    })
+const api = {
+    key: "fcc8de7015bbb202209bbf0261babf4c",
+    base: "https://api.openweathermap.org/data/2.5/"
+  }
+  
+  const searchbox = document.querySelector('.search-box');
+  searchbox.addEventListener('keypress', setQuery);
+  
+  function setQuery(evt) {
+    if (evt.keyCode == 13) {
+      getResults(searchbox.value);
+    }
+  }
+  
+  function getResults (query) {
+    fetch(`${api.base}weather?q=${query}&units=metric&APPID=${api.key}`)
+      .then(weather => {
+        return weather.json();
+      }).then(displayResults);
+  }
+  
+  function displayResults (weather) {
+    let city = document.querySelector('.location .city');
+    city.innerText = `${weather.name}, ${weather.sys.country}`;
+  
+    let now = new Date();
+    let date = document.querySelector('.location .date');
+    date.innerText = dateBuilder(now);
+  
+    let temp = document.querySelector('.current .temp');
+    temp.innerHTML = `${Math.round(weather.main.temp)}<span>°c</span>`;
+  
+    let weather_el = document.querySelector('.current .weather');
+    weather_el.innerText = weather.weather[0].main;
+  
+    let hilow = document.querySelector('.hi-low');
+    hilow.innerText = `${Math.round(weather.main.temp_min)}°c / ${Math.round(weather.main.temp_max)}°c`;
+  }
+  
+  function dateBuilder (d) {
+    let months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    let days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  
+    let day = days[d.getDay()];
+    let date = d.getDate();
+    let month = months[d.getMonth()];
+    let year = d.getFullYear();
+  
+    return `${day} ${date} ${month} ${year}`;
+  }
